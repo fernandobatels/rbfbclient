@@ -6,7 +6,13 @@ class RbfbclientTest < Minitest::Test
   end
 
   def test_simple_conn
-    conn = Rbfbclient::Connection.new('localhost')
+    conn = Rbfbclient::Connection.new({
+                                        host: 'localhost',
+                                        port: 3050,
+                                        db_name: 'test.fdb',
+                                        user: 'SYSDBA',
+                                        pass: 'masterkey'
+                                      })
     assert !conn.nil?
     conn.close
   end
