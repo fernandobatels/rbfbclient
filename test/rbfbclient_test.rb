@@ -1,11 +1,13 @@
 require 'test_helper'
 
-class RbfbclientStartTest < Minitest::Test
+class RbfbclientTest < Minitest::Test
   def test_has_version
-    assert Rbfbclient::VERSION != nil
+    assert !Rbfbclient::VERSION.nil?
   end
 
-  def test_start
-    assert_equal Rbfbclient.teste(""), "???"
+  def test_simple_conn
+    conn = Rbfbclient::Connection.new('localhost')
+    assert !conn.nil?
+    conn.close
   end
 end

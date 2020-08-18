@@ -4,24 +4,22 @@
 
 #[macro_use]
 extern crate rutie;
+extern crate rsfbclient;
+extern crate rsfbclient_native;
+#[macro_use]
+extern crate lazy_static;
 
-use rutie::{Class, Object, RString, VM};
+mod connection;
 
-class!(Rbfbclient);
+use rutie::{Module, Object};
 
-methods!(
-    Rbfbclient,
-    _itself,
-    fn perform(input: RString) -> RString {
-
-        RString::new_utf8("???")
-    }
-);
+module!(Rbfbclient);
 
 #[allow(non_snake_case)]
 #[no_mangle]
 pub extern "C" fn Init_rbfbclient() {
-    Class::from_existing("Rbfbclient").define(|itself| {
-        itself.def_self("teste", perform);
+    Module::from_existing("Rbfbclient").define(|itself| {
+
+        itself.define_nested_class("Connection", None).define(|itself| connection::defs(itself));
     });
 }
