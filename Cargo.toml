@@ -12,6 +12,7 @@ crate-type = ["dylib"]
 
 [dependencies]
 rutie = "0.8.0"
-rsfbclient = "0.6.0"
-rsfbclient-native = "0.6.0"
+rsfbclient = { git = "https://github.com/fernandobatels/rsfbclient", branch = "boolean" }
+rsfbclient-native = { git = "https://github.com/fernandobatels/rsfbclient", branch = "boolean" }
+rsfbclient-core = { git = "https://github.com/fernandobatels/rsfbclient", branch = "boolean" }
 lazy_static = "1.4.0"

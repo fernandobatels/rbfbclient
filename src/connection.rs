@@ -4,8 +4,8 @@
 
 use rsfbclient::*;
 use rutie::*;
-use rutie::types::*;
 use std::sync::Mutex;
+use crate::params::ToParams;
 
 class!(Connection);
 
@@ -102,27 +102,7 @@ methods!(
             .unwrap()
             .to_string();
 
-        let mut exec_params = vec![];
-
-        if let Ok(params) = params {
-            for (i, param) in params.into_iter().enumerate() {
-
-                match param.ty() {
-                    ValueType::RString => {
-                        let pstr = RString::try_convert(param)
-                            .unwrap()
-                            .to_string();
-                        exec_params.push(pstr.into_param());
-                    },
-                    _ => {
-                        VM::raise(Class::from_existing("StandardError"), &format!("Unsuported type({:?}) param at {}", param.ty(), i));
-                    }
-                }
-            }
-        }
-
-        let exec = conn.execute(&query, exec_params);
-        if let Err(e) = exec {
+        if let Err(e) = conn.execute(&query, params.to_params()) {
             VM::raise(Class::from_existing("StandardError"), &e.to_string());
         }
 

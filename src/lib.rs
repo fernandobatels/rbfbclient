@@ -10,6 +10,7 @@ extern crate rsfbclient_native;
 extern crate lazy_static;
 
 mod connection;
+mod params;
 
 use rutie::{Class, Object};
 

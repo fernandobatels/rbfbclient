@@ -49,4 +49,26 @@ class RbfbclientTest < Minitest::Test
 
     conn.close
   end
+
+  def test_params_support
+    conn = Rbfbclient::Connection.new({
+                                        db_name: 'test.fdb',
+                                      })
+    assert !conn.nil?
+
+    begin
+      conn.execute('create table fbtest4 (a varchar(50), b int, c float, d boolean)')
+    rescue
+    end
+
+    conn.execute('insert into fbtest4 (a) values (?)', ['fulano'])
+    conn.execute('insert into fbtest4 (b) values (?)', [10])
+    conn.execute('insert into fbtest4 (b) values (?)', [10.to_i])
+    conn.execute('insert into fbtest4 (c) values (?)', [10.20])
+    conn.execute('insert into fbtest4 (a) values (?)', [nil])
+    conn.execute('insert into fbtest4 (d) values (?)', [false])
+    conn.execute('insert into fbtest4 (d) values (?)', [true])
+
+    conn.close
+  end
 end
