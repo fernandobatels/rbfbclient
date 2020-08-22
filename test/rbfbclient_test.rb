@@ -17,7 +17,7 @@ class RbfbclientTest < Minitest::Test
     conn.close
   end
 
-  def test_simplec_exec
+  def test_simple_exec
     conn = Rbfbclient::Connection.new({
                                         db_name: 'test.fdb',
                                       })
@@ -29,6 +29,23 @@ class RbfbclientTest < Minitest::Test
     end
 
     conn.execute('insert into fbtest (name) values (\'val test\')')
+
+    conn.close
+  end
+
+  def test_simple_params_exec
+    conn = Rbfbclient::Connection.new({
+                                        db_name: 'test.fdb',
+                                      })
+    assert !conn.nil?
+
+    begin
+      conn.execute('create table fbtest3 (name varchar(50), city varchar(50))')
+    rescue
+    end
+
+    conn.execute('insert into fbtest3 (name) values (?)', ['fulano'])
+    conn.execute('insert into fbtest3 (name, city) values (?, ?)', ['fulanoson', 'joinville'])
 
     conn.close
   end

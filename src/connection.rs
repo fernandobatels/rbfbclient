@@ -4,6 +4,7 @@
 
 use rsfbclient::*;
 use rutie::*;
+use rutie::types::*;
 use std::sync::Mutex;
 
 class!(Connection);
@@ -82,7 +83,7 @@ methods!(
         NilClass::new()
     }
 
-    fn execute(query: RString) -> NilClass {
+    fn execute(query: RString, params: Array) -> NilClass {
         let op_conn = itself.get_data_mut(&*CD_WRAPPER)
             .conn
             .get_mut()
@@ -101,7 +102,26 @@ methods!(
             .unwrap()
             .to_string();
 
-        let exec = conn.execute(&query, ());
+        let mut exec_params = vec![];
+
+        if let Ok(params) = params {
+            for (i, param) in params.into_iter().enumerate() {
+
+                match param.ty() {
+                    ValueType::RString => {
+                        let pstr = RString::try_convert(param)
+                            .unwrap()
+                            .to_string();
+                        exec_params.push(pstr.into_param());
+                    },
+                    _ => {
+                        VM::raise(Class::from_existing("StandardError"), &format!("Unsuported type({:?}) param at {}", param.ty(), i));
+                    }
+                }
+            }
+        }
+
+        let exec = conn.execute(&query, exec_params);
         if let Err(e) = exec {
             VM::raise(Class::from_existing("StandardError"), &e.to_string());
         }
