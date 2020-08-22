@@ -113,5 +113,5 @@ methods!(
 pub fn defs(itself: &mut Class) {
     itself.def_self("new", new);
     itself.def("close", close);
-    itself.def("execute", execute);
+    itself.def("_execute", execute);
 }

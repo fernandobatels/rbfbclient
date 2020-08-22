@@ -45,7 +45,9 @@ class RbfbclientTest < Minitest::Test
     end
 
     conn.execute('insert into fbtest3 (name) values (?)', ['fulano'])
+    conn.execute('insert into fbtest3 (name) values (?)', 'fulano')
     conn.execute('insert into fbtest3 (name, city) values (?, ?)', ['fulanoson', 'joinville'])
+    conn.execute('insert into fbtest3 (name, city) values (?, ?)', 'fulanoson', 'joinville')
 
     conn.close
   end
