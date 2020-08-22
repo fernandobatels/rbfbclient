@@ -2,14 +2,14 @@
 //! Connection class
 //!
 
-use rsfbclient::ConnectionBuilder;
+use rsfbclient::*;
 use rutie::*;
-use std::cell::RefCell;
+use std::sync::Mutex;
 
 class!(Connection);
 
 pub struct ConnectionData {
-    pub conn: RefCell<rsfbclient::Connection<rsfbclient_native::NativeFbClient>>,
+    pub conn: Mutex<Option<rsfbclient::Connection<rsfbclient_native::NativeFbClient>>>
 }
 
 wrappable_struct!(ConnectionData, ConnectionDataWrapper, CD_WRAPPER);
@@ -17,6 +17,7 @@ wrappable_struct!(ConnectionData, ConnectionDataWrapper, CD_WRAPPER);
 methods!(
     Connection,
     itself,
+
     fn new(args: Hash) -> AnyObject {
         let args = args.map_err(|e| VM::raise_ex(e)).unwrap();
 
@@ -45,7 +46,7 @@ methods!(
         match cb.connect() {
             Ok(conn) => {
                 let data = ConnectionData {
-                    conn: RefCell::new(conn),
+                    conn: Mutex::new(Some(conn)),
                 };
 
                 Class::from_existing("Connection").wrap_data(data, &*CD_WRAPPER)
@@ -57,9 +58,53 @@ methods!(
             }
         }
     }
+
     fn close() -> NilClass {
-        let conn = itself.get_data_mut(&*CD_WRAPPER).conn.get_mut();
-        drop(conn);
+
+        let take_conn = itself.get_data_mut(&*CD_WRAPPER)
+            .conn
+            .get_mut()
+            .map_err(|e| VM::raise(Class::from_existing("StandardError"), &e.to_string()))
+            .unwrap()
+            .take();
+
+        if take_conn.is_none() {
+            VM::raise(Class::from_existing("StandardError"), "Connection is already closed");
+            return NilClass::new();
+        }
+
+        let conn = take_conn.unwrap();
+
+        if let Err(e) = conn.close() {
+            VM::raise(Class::from_existing("StandardError"), &e.to_string());
+        }
+
+        NilClass::new()
+    }
+
+    fn execute(query: RString) -> NilClass {
+        let op_conn = itself.get_data_mut(&*CD_WRAPPER)
+            .conn
+            .get_mut()
+            .map_err(|e| VM::raise(Class::from_existing("StandardError"), &e.to_string()))
+            .unwrap()
+            .as_mut();
+
+        if op_conn.is_none() {
+            VM::raise(Class::from_existing("StandardError"), "Connection is closed");
+            return NilClass::new();
+        }
+
+        let conn = op_conn.unwrap();
+
+        let query = query.map_err(|e| VM::raise_ex(e))
+            .unwrap()
+            .to_string();
+
+        let exec = conn.execute(&query, ());
+        if let Err(e) = exec {
+            VM::raise(Class::from_existing("StandardError"), &e.to_string());
+        }
 
         NilClass::new()
     }
@@ -68,4 +113,5 @@ methods!(
 pub fn defs(itself: &mut Class) {
     itself.def_self("new", new);
     itself.def("close", close);
+    itself.def("execute", execute);
 }
