@@ -6,6 +6,7 @@ use rsfbclient::*;
 use rutie::*;
 use std::sync::Mutex;
 use crate::params::ToParams;
+use crate::rows::ToRows;
 
 class!(Connection);
 
@@ -102,11 +103,37 @@ methods!(
             .unwrap()
             .to_string();
 
-        if let Err(e) = conn.execute(&query, params.to_params()) {
-            VM::raise(Class::from_existing("StandardError"), &e.to_string());
-        }
+        conn.execute(&query, params.to_params())
+            .map_err(|e| VM::raise(Class::from_existing("StandardError"), &e.to_string()))
+            .unwrap();
 
         NilClass::new()
+    }
+
+    fn query(query: RString, params: Array) -> Array {
+        let op_conn = itself.get_data_mut(&*CD_WRAPPER)
+            .conn
+            .get_mut()
+            .map_err(|e| VM::raise(Class::from_existing("StandardError"), &e.to_string()))
+            .unwrap()
+            .as_mut();
+
+        if op_conn.is_none() {
+            VM::raise(Class::from_existing("StandardError"), "Connection is closed");
+            return Array::new();
+        }
+
+        let conn = op_conn.unwrap();
+
+        let query = query.map_err(|e| VM::raise_ex(e))
+            .unwrap()
+            .to_string();
+
+        let rows = conn.query(&query, params.to_params())
+            .map_err(|e| VM::raise(Class::from_existing("StandardError"), &e.to_string()))
+            .unwrap();
+
+        return rows.to_rows();
     }
 );
 
@@ -114,4 +141,5 @@ pub fn defs(itself: &mut Class) {
     itself.def_self("new", new);
     itself.def("close", close);
     itself.def("_execute", execute);
+    itself.def("_query", query);
 }

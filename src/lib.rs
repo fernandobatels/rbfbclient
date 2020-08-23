@@ -11,6 +11,7 @@ extern crate lazy_static;
 
 mod connection;
 mod params;
+mod rows;
 
 use rutie::{Class, Object};
 

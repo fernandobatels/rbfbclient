@@ -73,4 +73,26 @@ class RbfbclientTest < Minitest::Test
 
     conn.close
   end
+
+  def test_query
+    conn = Rbfbclient::Connection.new({
+                                        db_name: 'test.fdb',
+                                      })
+    assert !conn.nil?
+
+    rows = conn.query('select * from rdb$database;')
+    assert_equal 1, rows.size
+
+    rows = conn.query('select 10.20 as a, 10 as b, \'test\' as c, CURRENT_DATE as d, CURRENT_TIME as e, CURRENT_TIMESTAMP as f from rdb$database;')
+    assert_equal 1, rows.size
+    assert_equal 10.20, rows[0][0]
+    assert_equal 10, rows[0][1]
+    assert_equal 'test', rows[0][2]
+    assert_equal Date.today, rows[0][3]
+    now = DateTime.now
+    assert_equal DateTime.new(now.year, now.month, now.day, now.hour, now.min, now.sec, '+00:00'), rows[0][4]
+    assert_equal DateTime.new(now.year, now.month, now.day, now.hour, now.min, now.sec, '+00:00'), rows[0][5]
+
+    conn.close
+  end
 end
