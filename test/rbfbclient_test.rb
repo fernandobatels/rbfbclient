@@ -53,13 +53,15 @@ class RbfbclientTest < Minitest::Test
   end
 
   def test_params_support
+    require 'date'
+
     conn = Rbfbclient::Connection.new({
                                         db_name: 'test.fdb',
                                       })
     assert !conn.nil?
 
     begin
-      conn.execute('create table fbtest4 (a varchar(50), b int, c float, d boolean)')
+      conn.execute('create table fbtest4 (a varchar(50), b int, c float, d boolean, e date, f timestamp)')
     rescue
     end
 
@@ -70,6 +72,7 @@ class RbfbclientTest < Minitest::Test
     conn.execute('insert into fbtest4 (a) values (?)', [nil])
     conn.execute('insert into fbtest4 (d) values (?)', [false])
     conn.execute('insert into fbtest4 (d) values (?)', [true])
+    conn.execute('insert into fbtest4 (e, f) values (?, ?)', [Date.today, DateTime.now])
 
     conn.close
   end

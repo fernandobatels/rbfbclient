@@ -1,5 +1,6 @@
 require "rbfbclient/version"
 require 'rutie'
+require 'date'
 
 module Rbfbclient
   Rutie.new(:rbfbclient).init("Init_rbfbclient", __dir__)

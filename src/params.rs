@@ -5,6 +5,7 @@
 use rsfbclient_core::*;
 use rutie::*;
 use rutie::types::*;
+use chrono::{NaiveDate, NaiveDateTime};
 
 /// Convert the objects to Vec<Param>
 /// supported by the rsfbclient
@@ -57,6 +58,30 @@ impl ToParams for Array {
                 ValueType::True => {
                     query_params.push(false.into_param());
                 },
+                ValueType::Data if is_a(&param, "DateTime") => {
+                    let date_str = unsafe {
+                        param.send("to_s", &[])
+                            .try_convert_to::<RString>()
+                            .unwrap()
+                            .to_string()
+                    };
+
+                    let datetime = NaiveDateTime::parse_from_str(&date_str, "%Y-%m-%dT%H:%M:%S%z")
+                        .unwrap();
+                    query_params.push(datetime.into_param());
+                },
+                ValueType::Data if is_a(&param, "Date") => {
+                    let date_str = unsafe {
+                        param.send("to_s", &[])
+                            .try_convert_to::<RString>()
+                            .unwrap()
+                            .to_string()
+                    };
+
+                    let date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
+                        .unwrap();
+                    query_params.push(date.into_param());
+                },
                 _ => {
                     VM::raise(Class::from_existing("StandardError"), &format!("Unsuported type({:?}) param at {}", param.ty(), i));
                 }
@@ -64,5 +89,14 @@ impl ToParams for Array {
         }
 
         return query_params;
+    }
+}
+
+fn is_a(param: &AnyObject, class: &'static str) -> bool {
+    unsafe {
+        param.send("is_a?", &[Class::from_existing(class).to_any_object()])
+            .try_convert_to::<Boolean>()
+            .unwrap()
+            .to_bool()
     }
 }

@@ -16,8 +16,6 @@ impl ToRows for Vec<Row> {
     fn to_rows(self) -> Array {
         let mut rows = Array::with_capacity(self.len());
 
-        VM::require("date");
-
         for dbrow in self {
             let dbcols = dbrow.get_all::<Row>().map_err(|e| VM::raise(Class::from_existing("StandardError"), &e.to_string()))
                 .unwrap()
