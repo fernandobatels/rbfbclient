@@ -98,4 +98,18 @@ class RbfbclientTest < Minitest::Test
 
     conn.close
   end
+
+  def test_query_hash
+    conn = Rbfbclient::Connection.new({
+                                        db_name: 'test.fdb',
+                                      })
+    assert !conn.nil?
+
+    rows = conn.query(:hash, 'select 10 as a, 20 as b from rdb$database;')
+    assert_equal 1, rows.size
+    assert_equal 10, rows[0]['a']
+    assert_equal 20, rows[0]['b']
+
+    conn.close
+  end
 end

@@ -12,8 +12,8 @@ crate-type = ["dylib"]
 
 [dependencies]
 rutie = "0.8.0"
-rsfbclient = "0.7.0"
-rsfbclient-native = "0.7.0"
-rsfbclient-core = "0.7.0"
+rsfbclient = "0.8.0"
+rsfbclient-native = "0.8.0"
+rsfbclient-core = "0.8.0"
 lazy_static = "1.4.0"
 chrono = "0.4.13"

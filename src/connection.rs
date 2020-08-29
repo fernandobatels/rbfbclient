@@ -110,7 +110,7 @@ methods!(
         NilClass::new()
     }
 
-    fn query(query: RString, params: Array) -> Array {
+    fn query(as_hash: Boolean, query: RString, params: Array) -> Array {
         let op_conn = itself.get_data_mut(&*CD_WRAPPER)
             .conn
             .get_mut()
@@ -125,6 +125,10 @@ methods!(
 
         let conn = op_conn.unwrap();
 
+        let as_hash = as_hash.map_err(|e| VM::raise_ex(e))
+            .unwrap()
+            .to_bool();
+
         let query = query.map_err(|e| VM::raise_ex(e))
             .unwrap()
             .to_string();
@@ -133,7 +137,11 @@ methods!(
             .map_err(|e| VM::raise(Class::from_existing("StandardError"), &e.to_string()))
             .unwrap();
 
-        return rows.to_rows();
+        if as_hash {
+            rows.to_hash_rows()
+        } else {
+            rows.to_array_rows()
+        }
     }
 );
 
