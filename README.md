@@ -1,6 +1,6 @@
-# A new Firebird Extension Library 
+# A new Firebird Extension Library for Ruby
 
-A new version of [Firebird Extension Library](https://github.com/rowland/fb) using [Rust instead of C](https://github.com/fernandobatels/rsfbclient) for binds de firebird API. 
+A new version of [Firebird Extension Library for Ruby](https://github.com/rowland/fb) using [Rust instead of C](https://github.com/fernandobatels/rsfbclient) for binding of firebird API. 
 
 ## Goals
 
